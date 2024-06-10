@@ -11,7 +11,7 @@ logging.info("Starting logging")
 
 # define paths
 path_input = Path(os.environ.get("INPUTS", "/data/inputs"))
-path_output = Path('./output')
+path_output = Path(os.environ.get("OUTPUTS", "/data/outputs"))
 path_logs = Path(os.environ.get("LOGS", "/data/logs"))
 dids = json.loads(os.environ.get("DIDS", '[]'))
 did = dids[0]
@@ -28,19 +28,23 @@ mental_health_output = os.path.join(path_output, 'mental_health.csv')
 crime_output = os.path.join(path_output, 'crime.csv')
 registration_output = os.path.join(path_output, 'registration.csv')
 
-
+# try to read as csv
 try:
-    # try to read as csv
-    with open(path_input_file, 'rb') as fh:
-        df = pd.read_csv(fh)
-except Exception:
-    # try to use joblib to load
-    try:
-        with open(path_input_file, 'rb') as fh:
-            others = joblib.load(fh)
+    # with open(path_input_file, 'rb') as fh:
+    df = pd.read_csv(path_input_file)
+except:
+    pass
 
-    except Exception:
-        raise Exception(f'File input "{path_input_file}" is not excepted, please ensure that the file input is correct!')
+# try to use joblib to load
+try:
+    # with open(path_input_file, 'rb') as fh:
+    others = joblib.load(path_input_file)
+
+except:
+    pass
+
+if 'df' not in locals() and 'others' not in locals():
+    raise Exception(f'File input "{path_input_file}" is not excepted, please ensure that the file input is correct!')
 
 logging.debug(f'Loaded file {path_input_file}.')
 
