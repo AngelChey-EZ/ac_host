@@ -292,7 +292,7 @@ plt.savefig(buffer, format='png')
 buffer.seek(0)
 plt.close()
 
-text = f'The age range is between {df['age'].min()} and {df['age'].max()}.'
+text = f'The age range is between {df["age"].min()} and {df["age"].max()}.'
 
 elements.append(Paragraph('Age Related', styles['h3']))
 elements.append(Paragraph(text.replace('\n', '<br />'), styles['Normal']))
@@ -309,7 +309,7 @@ plt.savefig(buffer, format='png')
 buffer.seek(0)
 plt.close()
 
-text = f'The income range is between US${df['income'].min()} and US${df['income'].max()}.'
+text = f'The income range is between US${df["income"].min()} and US${df["income"].max()}.'
 
 elements.append(PageBreak())
 elements.append(Paragraph('Income Related', styles['h3']))
