@@ -63,13 +63,13 @@ for job_data in result_data:
                 
             # load model and transformer
             if filename.lower().endswith('.pkl') and 'scaler' in filename.lower():
-                scaler = joblib.loads(response.read())
+                scaler = joblib.load(BytesIO(response.read()))
                 
             elif filename.lower().endswith('.pkl') and 'encoder' in filename.lower():
-                encoder = joblib.loads(response.read())
+                encoder = joblib.load(BytesIO(response.read()))
                 
             elif filename.lower().endswith('.joblib') and 'model' in filename.lower():
-                model = joblib.load(response.read())
+                model = joblib.load(BytesIO(response.read()))
 
             elif filename.lower().endswith('.csv') and 'blacklist' in filename.lower():
                 csv_data = response.read().decode("utf-8")
@@ -88,7 +88,7 @@ for job_data in result_data:
                 registration_df = pd.read_csv(StringIO(csv_data))
 
     except Exception as e:
-        logging.debug(f"Error fetching data from URL: {url}, error: {e}")
+        raise Exception(f"Error fetching data from URL: {url}, error: {e}")
 logging.debug('Loaded all input files.')
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
