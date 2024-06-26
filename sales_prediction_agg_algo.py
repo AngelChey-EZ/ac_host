@@ -65,7 +65,7 @@ for job_data in result_data:
                 model_loaded = loaded_objects['model']
                 country_name, _ = filename.split('_')
                 df = decrypt_df(df_loaded)
-                dfs.append(df_loaded)
+                dfs.append(df)
                 models.append((country_name, model_loaded))
         
 
