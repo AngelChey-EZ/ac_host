@@ -159,10 +159,7 @@ print('Final Model:', final_model)
 logging.debug('Saving model and encrypted data.')
 joblib.dump(final_model, model_output)
 encrypt_and_save_data(df)
-temp = ['Country', 'Body Type', 'Brand']
-for x in range(3):
-    df[temp[x]] = les[x].inverse_transform(df.iloc[:, x])
-df.to_csv(f'./output/{country}.csv', index=False)
+
 logging.debug(f'Saving complete. Model is saved at {model_output}, encrypted data is saved at {df_output}')
 
 logging.debug("FINISHED ALGORITHM EXECUTION")
