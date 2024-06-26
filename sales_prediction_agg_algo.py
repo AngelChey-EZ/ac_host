@@ -65,15 +65,19 @@ for job_data in result_data:
                 
             # load model and transformer
             if filename.lower().endswith('.pkl'):
+                loaded_objects = joblib.load(BytesIO(response.read()))
+                df_loaded = loaded_objects['dataframe']
+                model_loaded = loaded_objects['model']
                 country_name, _ = filename.split('_')
-                model = joblib.load(BytesIO(response.read()))
-                print(model)
-                models.append((country_name, model))
+                # model = joblib.load(BytesIO(response.read()))
+                # print(model)
+                dfs.append(df_loaded)
+                models.append((country_name, model_loaded))
 
-            elif filename.lower().endswith('.csv'):
-                csv_data = response.read().decode("utf-8")
-                temp = load_and_decrypt_df(StringIO(csv_data))
-                dfs.append(temp)
+            # elif filename.lower().endswith('.csv'):
+            #     csv_data = response.read().decode("utf-8")
+            #     temp = load_and_decrypt_df(StringIO(csv_data))
+            #     dfs.append(temp)
         
 
     except Exception as e:

@@ -51,7 +51,7 @@ logging.debug('Encoders loaded')
 def encrypt_and_save_data(df):
     fernet = Fernet(b'6xDG1u5gSO2lxpRWuBlJuhtB4xGwNyLJFbpI9O-TgC0=')
     encrypted_data = df.map(lambda x: fernet.encrypt(str(x).encode()).decode())
-    encrypted_data.to_csv(df_output, index=False)
+    # encrypted_data.to_csv(df_output, index=False)
     return encrypted_data
 
 logging.debug('Begin data proccessing...')
@@ -66,8 +66,9 @@ df = pd.melt(df[all_feature], id_vars=non_date_feature, var_name='quarter_year',
 country = df.iloc[0, 0]
 
 # define output path
-model_output = os.path.join(path_output, f'{country}_model.pkl')
-df_output = os.path.join(path_output, f'{country}_df.csv')
+# model_output = os.path.join(path_output, f'{country}_model.pkl')
+# df_output = os.path.join(path_output, f'{country}_df.csv')
+file_output = os.path.join(path_output, f'{country}_out.pkl')
 
 # function to convert Qx yyyy into date format
 logging.debug('Proccssing date...')
@@ -157,9 +158,10 @@ print(f'R2 for {country}: {round(r2*100, 2)}%')
 print('Final Model:', final_model)
 
 logging.debug('Saving model and encrypted data.')
-joblib.dump(final_model, model_output)
-encrypt_and_save_data(df)
+# joblib.dump(final_model, model_output)
+encrypt_df = encrypt_and_save_data(df)
+joblib.dump({'dataframe': encrypt_df, 'model': final_model}, file_output)
 
-logging.debug(f'Saving complete. Model is saved at {model_output}, encrypted data is saved at {df_output}')
+logging.debug(f'Saving complete. Model and encrypted data are saved at {file_output}')
 
 logging.debug("FINISHED ALGORITHM EXECUTION")
