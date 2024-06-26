@@ -32,6 +32,7 @@ with open(path_input, "r") as json_file:
     algoCustomData = json.load(json_file)
 
 result_data = algoCustomData["resultUrls"]
+print(algoCustomData)
 
 dfs = []
 models = []
