@@ -59,11 +59,14 @@ for job_data in result_data:
                 filename = content_disposition[filename_index+len('filename='):]
                 filename = unquote(filename)  
                 filename = filename.strip('"') 
+            
+            print(filename)
                 
             # load model and transformer
             if filename.lower().endswith('.pkl'):
                 country_name, _ = filename.split('_')
                 model = joblib.load(BytesIO(response.read()))
+                print(model)
                 models.append((country_name, model))
 
             elif filename.lower().endswith('.csv'):
@@ -75,7 +78,8 @@ for job_data in result_data:
     except Exception as e:
         raise Exception(f"Error fetching data from URL: {url}, error: {e}")
 logging.debug('Loaded all input files.')
-
+print(models)
+print(dfs)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 logging.info("Loading encoders...")
@@ -115,6 +119,8 @@ test_years = unique_year[no_train_years:]
 
 x = df.iloc[:, :-1]
 y = df['Sales']
+
+print(x)
 
 x_train, x_test = x[x['Year'].isin(train_years)], x[x['Year'].isin(test_years)]
 y_train, y_test = y[:x_test.index[0]], y[x_test.index[0]:]
