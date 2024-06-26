@@ -96,7 +96,6 @@ logging.debug('Proccssing cetegorical features complete.')
 
 df = df.groupby(df.columns[:-1].tolist(), as_index=False).agg({'Sales': 'sum'})
 df = df.sort_values(by=['Year', 'Quarter']).reset_index(drop=True)
-df.to_csv('./no.csv', index=False)
 
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error, r2_score
