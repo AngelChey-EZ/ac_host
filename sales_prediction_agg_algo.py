@@ -8,7 +8,6 @@ from urllib import request
 import logging
 from pathlib import Path
 from urllib.parse import unquote
-from io import StringIO
 import json
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s', handlers=[logging.StreamHandler()])
@@ -32,14 +31,12 @@ with open(path_input, "r") as json_file:
     algoCustomData = json.load(json_file)
 
 result_data = algoCustomData["resultUrls"]
-print(algoCustomData)
 
 dfs = []
 models = []
 
 # function to decrypt data
-def load_and_decrypt_df(data):
-    df = pd.read_csv(data)
+def decrypt_df(df):
     fernet = Fernet(b'6xDG1u5gSO2lxpRWuBlJuhtB4xGwNyLJFbpI9O-TgC0=')
     decrypted_data = df.map(lambda x: fernet.decrypt(x.encode()).decode())
     return decrypted_data
@@ -60,8 +57,6 @@ for job_data in result_data:
                 filename = content_disposition[filename_index+len('filename='):]
                 filename = unquote(filename)  
                 filename = filename.strip('"') 
-            
-            print(filename)
                 
             # load model and transformer
             if filename.lower().endswith('.pkl'):
@@ -69,22 +64,15 @@ for job_data in result_data:
                 df_loaded = loaded_objects['dataframe']
                 model_loaded = loaded_objects['model']
                 country_name, _ = filename.split('_')
-                # model = joblib.load(BytesIO(response.read()))
-                # print(model)
+                df = decrypt_df(df_loaded)
                 dfs.append(df_loaded)
                 models.append((country_name, model_loaded))
-
-            # elif filename.lower().endswith('.csv'):
-            #     csv_data = response.read().decode("utf-8")
-            #     temp = load_and_decrypt_df(StringIO(csv_data))
-            #     dfs.append(temp)
         
 
     except Exception as e:
         raise Exception(f"Error fetching data from URL: {url}, error: {e}")
 logging.debug('Loaded all input files.')
-print(models)
-print(dfs)
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 logging.info("Loading encoders...")
@@ -124,8 +112,6 @@ test_years = unique_year[no_train_years:]
 
 x = df.iloc[:, :-1]
 y = df['Sales']
-
-print(x)
 
 x_train, x_test = x[x['Year'].isin(train_years)], x[x['Year'].isin(test_years)]
 y_train, y_test = y[:x_test.index[0]], y[x_test.index[0]:]
