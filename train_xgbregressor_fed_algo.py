@@ -154,9 +154,10 @@ print('Final Model:', final_model)
 original_y_pred = final_model.predict(x)
 original_y_pred = np.clip(original_y_pred, a_min=0, a_max=None)
 
-logging.debug('Saving model and encrypted data.')
+logging.debug('Saving model and predicted data.')
 # add predicted sales and drop sales
 df['Predicted Sales'] = original_y_pred
+df['Predicted Sales'] = df['Predicted Sales'].astype('int')
 df.drop(columns=['Sales'], inplace=True)
 joblib.dump({'dataframe': df, 'model': final_model}, file_output)
 
