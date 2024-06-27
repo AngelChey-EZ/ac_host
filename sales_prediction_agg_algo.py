@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 import joblib
-from cryptography.fernet import Fernet
 import numpy as np
 from io import BytesIO
 from urllib import request
@@ -22,6 +21,7 @@ path_logs = Path(os.environ.get("LOGS", "/data/logs"))
 
 path_output_file = os.path.join(path_output, 'automotive_predict_sales.csv')
 report_output_path = os.path.join(path_output, 'report.pdf')
+model_output_path = os.path.join(path_output, 'stacking_regression.pkl')
 
 
 algoCustomData = {}
@@ -35,11 +35,6 @@ result_data = algoCustomData["resultUrls"]
 dfs = []
 models = []
 
-# function to decrypt data
-def decrypt_df(df):
-    fernet = Fernet(b'6xDG1u5gSO2lxpRWuBlJuhtB4xGwNyLJFbpI9O-TgC0=')
-    decrypted_data = df.map(lambda x: fernet.decrypt(x.encode()).decode())
-    return decrypted_data
 
 for job_data in result_data:
     try:
@@ -64,8 +59,7 @@ for job_data in result_data:
                 df_loaded = loaded_objects['dataframe']
                 model_loaded = loaded_objects['model']
                 country_name, _ = filename.split('_')
-                df = decrypt_df(df_loaded)
-                dfs.append(df)
+                dfs.append(df_loaded)
                 models.append((country_name, model_loaded))
         
 
@@ -111,7 +105,7 @@ train_years = unique_year[:no_train_years]
 test_years = unique_year[no_train_years:]
 
 x = df.iloc[:, :-1]
-y = df['Sales']
+y = df['Predicted Sales']
 
 x_train, x_test = x[x['Year'].isin(train_years)], x[x['Year'].isin(test_years)]
 y_train, y_test = y[:x_test.index[0]], y[x_test.index[0]:]
@@ -193,6 +187,7 @@ logging.info("Predicted future sales")
 logging.info("Saving Result...")
 output_df = predict_df[['Country', 'Body Type', 'Brand', 'Quarter', 'Year', 'Predicted Sales']]
 output_df.to_csv(path_output_file, index=False)
+joblib.dump(stacking_regressor, model_output_path)
 logging.debug(f'Result is saved to {path_output_file}')
 
 ######################## GENERATE REPORT ########################

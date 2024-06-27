@@ -4,7 +4,6 @@ import os
 import logging
 import pandas as pd
 import joblib
-from cryptography.fernet import Fernet
 import numpy as np
 from io import BytesIO
 from urllib import request
@@ -47,12 +46,6 @@ for url in urls:
     les.append(temp)
 logging.debug('Encoders loaded')
 
-# function to encrypt the df so that output csv is encrypted
-def encrypt_and_save_data(df):
-    fernet = Fernet(b'6xDG1u5gSO2lxpRWuBlJuhtB4xGwNyLJFbpI9O-TgC0=')
-    encrypted_data = df.map(lambda x: fernet.encrypt(str(x).encode()).decode())
-    # encrypted_data.to_csv(df_output, index=False)
-    return encrypted_data
 
 logging.debug('Begin data proccessing...')
 # extract the column
@@ -157,11 +150,16 @@ print(f'MSE for {country}: {round(mse, 2)}')
 print(f'R2 for {country}: {round(r2*100, 2)}%')
 print('Final Model:', final_model)
 
-logging.debug('Saving model and encrypted data.')
-# joblib.dump(final_model, model_output)
-encrypt_df = encrypt_and_save_data(df)
-joblib.dump({'dataframe': encrypt_df, 'model': final_model}, file_output)
+# predict sales on all x data
+original_y_pred = final_model.predict(x)
+original_y_pred = np.clip(original_y_pred, a_min=0, a_max=None)
 
-logging.debug(f'Saving complete. Model and encrypted data are saved at {file_output}')
+logging.debug('Saving model and encrypted data.')
+# add predicted sales and drop sales
+df['Predicted Sales'] = original_y_pred
+df.drop(columns=['Sales'], inplace=True)
+joblib.dump({'dataframe': df, 'model': final_model}, file_output)
+
+logging.debug(f'Saving complete. Model and predicted sales on original data are saved at {file_output}')
 
 logging.debug("FINISHED ALGORITHM EXECUTION")
