@@ -7,17 +7,17 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Conv1D, MaxPooling1D, GlobalMaxPooling1D, Dropout, Embedding
 from tensorflow.keras.models import load_model
-import csv
 
 
+# Load required stuff
 #Load pre-trained CNN model
-model = load_model('./classifier.model')
+model = load_model('./output/Model')
 
 #Define product category
 product_category = ['Debt collection', 'Consumer Loan', 'Mortgage', 'Credit card', 'Credit reporting', 'Student loan', 'Bank account or service', 'Payday loan', 'Money transfers', 'Other financial service', 'Prepaid card']
 
 #Input consumer complaints data
-complaints = pd.read_csv('Consumer Complaint.csv')
+complaints = pd.read_csv('./data/new customer complaint.csv')
 
 #Transform complaints data into list
 a = complaints['consumer_complaint_narrative']
@@ -41,9 +41,50 @@ for i in list_of_lists:
 
 
 #Specify output path
-csv_file_path = 'output.csv'
+csv_file_path = './output/result.csv'
+
+
 
 # Write the data to the CSV file
-with open(csv_file_path, 'w', newline='') as csv_file:
-    csv_writer = csv.writer(csv_file)
-    csv_writer.writerows(c)
+# with open(csv_file_path, 'w', newline='') as csv_file:
+complaints['Predicted Produce'] = c
+complaints.to_csv('./output/result.csv', index=False)
+
+import matplotlib.pyplot as plt 
+from io import BytesIO
+import seaborn as sns
+sns.set_theme()
+
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, BaseDocTemplate, Paragraph, Image, PageBreak, Frame, PageTemplate
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+# start pdf
+doc = SimpleDocTemplate('./output/report2.pdf', pagesize=A4)
+styles = getSampleStyleSheet()
+
+elements = []
+
+centered_h3_style = ParagraphStyle(
+        name='CenteredH3',
+        parent=styles['Heading3'],  # Inherit properties from Heading3 style
+        alignment=1,  # 0=left, 1=center, 2=right, 3=justify
+    )
+
+# start report
+elements.append(Paragraph("Report Customer Complaint Classification on Product Category", styles['Title']))
+elements.append(PageBreak())
+
+sns.countplot(y=c)
+plt.title('Count on Predicted Product Category')
+plt.ylabel('Product Category')
+plt.tight_layout()
+
+buffer = BytesIO()
+plt.savefig(buffer, format='png')
+buffer.seek(0)
+plt.close()
+
+elements.append(Image(buffer, width=400, height=300))
+
+doc.build(elements)
