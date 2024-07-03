@@ -18,13 +18,30 @@ from memory_profiler import profile
 
 @profile
 def my_function():
-    # %% Setup logging
+    # Setup logging
+
+    import subprocess
+    import time
+    import threading
+
+    def log_gpu_memory(interval=10):
+        while True:
+            result = subprocess.run(['nvidia-smi', '--query-gpu=memory.used,memory.total', '--format=csv,nounits,noheader'], 
+                                    stdout=subprocess.PIPE)
+            usage = result.stdout.decode('utf-8').strip()
+            print(f"GPU Memory Usage: {usage}")
+            time.sleep(interval)
+
+    # Start logging GPU memory usage in a separate thread
+    log_thread = threading.Thread(target=log_gpu_memory, args=(10,), daemon=True)
+    log_thread.start()
+
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s', handlers=[logging.StreamHandler()])
 
     logging.info("Starting logging")
 
 
-    # %% Paths
+    # Paths
 
     path_output = Path('./output')
     path_input_file = Path('./data/past_customer_complaints.csv')
@@ -32,20 +49,23 @@ def my_function():
     path_output_model = path_output / 'Model'
     path_output_report = os.path.join(path_output, 'report.pdf')
 
-    # %% Check all paths
-    assert path_input_file.exists(), "Can't find required mounted path: {}".format(path_input_file)
-    assert path_input_file.is_file() | path_input_file.is_symlink(), "{} must be a file.".format(path_input_file)
-    assert path_output.exists(), "Can't find required mounted path: {}".format(path_output)
-    # assert path_logs.exists(), "Can't find required mounted path: {}".format(path_output)
-    logging.debug(f"Selected input file: {path_input_file} {os.path.getsize(path_input_file)/1000/1000} MB")
+    # Check all paths
+    # assert path_input_file.exists(), "Can't find required mounted path: {}".format(path_input_file)
+    # assert path_input_file.is_file() | path_input_file.is_symlink(), "{} must be a file.".format(path_input_file)
+    # assert path_output.exists(), "Can't find required mounted path: {}".format(path_output)
+    # # assert path_logs.exists(), "Can't find required mounted path: {}".format(path_output)
+    # logging.debug(f"Selected input file: {path_input_file} {os.path.getsize(path_input_file)/1000/1000} MB")
     logging.debug(f"Target output folder: {path_output}")
 
 
-    # %% Load data
+    # Load data
     logging.debug("Loading {}".format(path_input_file))
 
-    with open(path_input_file, 'rb') as fh:
-        df = pd.read_csv(fh)
+    # with open(path_input_file, 'rb') as fh:
+    #     df = pd.read_csv(fh)
+    df1 = pd.read_csv('./data/past_complaint_1.csv')
+    df2 = pd.read_csv('./data/past_complaint_2.csv')
+    df = pd.concat([df1, df2], axis=0)
 
     logging.debug("Loaded {} records into DataFrame".format(len(df)))
 
