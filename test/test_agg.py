@@ -30,16 +30,20 @@ logging.debug("Loading input files...")
 with open(path_input, "r") as json_file:
     algoCustomData = json.load(json_file)
 
+print('print data from fed job')
 print(algoCustomData)
 path_input = Path(
     os.path.join(os.environ.get("INPUTS", "/data/inputs"))
 )
 
+print('listing inputs')
 input_files = list(path_input.iterdir())
+print(input_files)
 
 # Get all environment variables
 env_vars = os.environ
 
+print('start listing all env')
 # Print each environment variable
 for key, value in env_vars.items():
     print(f'{key}: {value}')
